@@ -1,6 +1,7 @@
 ﻿using CustomerPortal.Controllers.Customers.Models;
 using DataTransfer;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Threading.Tasks;
 
 namespace CustomerPortal.Controllers.Customers
@@ -11,6 +12,13 @@ namespace CustomerPortal.Controllers.Customers
     [Produces("application/json")]
     public class CustomersController : ControllerBase
     {
+        private readonly ICustomerService _customerService;
+
+        public CustomersController(ICustomerService customerService)
+        {
+            _customerService = customerService ?? throw new ArgumentNullException(nameof(customerService));
+        }
+
         /// <summary>
         /// Create Customer.
         /// </summary>
@@ -18,7 +26,17 @@ namespace CustomerPortal.Controllers.Customers
         [HttpPost("add")]
         public async Task<ActionResult<CustomerDetails>> CreateCustomer(AddCustomerRequest customer)
         {
-            return new NotFoundResult();
+            var customerToCreate = new CustomerDetails()
+            {
+                FirstName = customer.FirstName,
+                LastName = customer.LastName,
+                ReferenceNumber = customer.ReferenceNumber,
+                Email = customer.Email,
+                DOB = customer.DOB?.Date
+            };
+
+            var createdCustomer = await _customerService.AddCustomerAsync(customerToCreate);
+            return CreatedAtAction(nameof(GetCustomer), new { id = createdCustomer.Id }, createdCustomer);
         }
 
         /// <summary>
@@ -28,7 +46,8 @@ namespace CustomerPortal.Controllers.Customers
         [HttpGet("{id:int:min(1)}")]
         public async Task<ActionResult<CustomerDetails>> GetCustomer(int id)
         {
-            return new NotFoundResult();
+            var customer = await _customerService.GetCustomerAsync(id);
+            return Ok(customer);
         }
     }
 }
