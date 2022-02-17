@@ -38,6 +38,11 @@ namespace Database.Repositories
         {
             var customer = await Context.Customers.FindAsync(customerId);
 
+            if (customer == null)
+            {
+                throw new Exception($"No customer could not be found with ID {customerId}");
+            }
+
             return new CustomerDetails
             {
                 Id = customer.Id,

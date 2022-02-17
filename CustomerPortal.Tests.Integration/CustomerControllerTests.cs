@@ -113,7 +113,7 @@ namespace CustomerPortal.Tests.Integration
 
             var response = await client.GetAsync($"{GetCustomerUrl}/404");
 
-            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         }
     }
 }
