@@ -1,4 +1,5 @@
-﻿using Database.Entities;
+﻿using AutoMapper;
+using Database.Entities;
 using Database.Interfaces;
 using DataTransfer;
 using System;
@@ -9,10 +10,14 @@ namespace Database.Repositories
     public class CustomerRepository : ICustomerRepository
     {
         private readonly AFIContext Context;
+        private readonly IMapper Mapper;
 
-        public CustomerRepository(AFIContext context)
+        public CustomerRepository(
+            AFIContext context,
+            IMapper mapper)
         {
             Context = context ?? throw new ArgumentNullException(nameof(context));
+            Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         public async Task<CustomerDetails> AddAsync(CustomerDetails customerDetails)
@@ -29,9 +34,7 @@ namespace Database.Repositories
             Context.Customers.Add(customer);
             await Context.SaveChangesAsync();
 
-            customerDetails.Id = customer.Id;
-
-            return customerDetails;
+            return Mapper.Map<CustomerDetails>(customer);
         }
 
         public async Task<CustomerDetails> GetAsync(int customerId)
@@ -43,15 +46,7 @@ namespace Database.Repositories
                 throw new Exception($"No customer could not be found with ID {customerId}");
             }
 
-            return new CustomerDetails
-            {
-                Id = customer.Id,
-                FirstName = customer.FirstName,
-                LastName = customer.LastName,
-                ReferenceNumber = customer.ReferenceNumber,
-                DOB = customer.DOB,
-                Email = customer.Email
-            };
+            return Mapper.Map<CustomerDetails>(customer);
         }
     }
 }
