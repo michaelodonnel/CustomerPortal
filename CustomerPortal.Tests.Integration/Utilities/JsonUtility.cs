@@ -15,5 +15,10 @@ namespace CustomerPortal.Tests.Integration.Utilities
         {
             return (obj != null) ? JsonConvert.SerializeObject(obj) : string.Empty;
         }
+
+        public static TObject ConvertFromJsonString<TObject>(string obj)
+        {
+            return !string.IsNullOrEmpty(obj) ? JsonConvert.DeserializeObject<TObject>(obj) : default;
+        }
     }
 }

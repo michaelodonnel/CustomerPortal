@@ -1,6 +1,7 @@
 using CustomerPortal.Tests.Integration.Utilities;
 using DataTransfer;
 using FluentAssertions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
 using System;
 using System.Net;
@@ -60,6 +61,24 @@ namespace CustomerPortal.Tests.Integration
             var response = await client.PostAsync(AddCustomerUrl, content);
 
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var parsedJson = JsonUtility.ConvertFromJsonString<ValidationProblemDetails>(responseContent);
+
+            parsedJson.Errors.Should().ContainKey("FirstName");
+            parsedJson.Errors["FirstName"].Should().BeEquivalentTo("The length of 'First Name' must be 50 characters or fewer. You entered 56 characters.");
+
+            parsedJson.Errors.Should().ContainKey("LastName");
+            parsedJson.Errors["LastName"].Should().BeEquivalentTo("The length of 'Last Name' must be 50 characters or fewer. You entered 57 characters.");
+
+            parsedJson.Errors.Should().ContainKey("ReferenceNumber");
+            parsedJson.Errors["ReferenceNumber"].Should().BeEquivalentTo("The specified condition was not met for 'Reference Number'.");
+
+            parsedJson.Errors.Should().ContainKey("Email");
+            parsedJson.Errors["Email"].Should().BeEquivalentTo("The specified condition was not met for 'Email'.");
+
+            parsedJson.Errors.Should().ContainKey("DOB");
+            parsedJson.Errors["DOB"].Should().BeEquivalentTo($"'DOB' must be less than or equal to '{DateTime.Now.AddYears(-18)}'.");
         }
 
         [Fact]
@@ -81,6 +100,18 @@ namespace CustomerPortal.Tests.Integration
             var response = await client.PostAsync(AddCustomerUrl, content);
 
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var parsedJson = JsonUtility.ConvertFromJsonString<ValidationProblemDetails>(responseContent);
+
+            parsedJson.Errors.Should().ContainKey("FirstName");
+            parsedJson.Errors["FirstName"].Should().BeEquivalentTo("The length of 'First Name' must be at least 3 characters. You entered 0 characters.");
+
+            parsedJson.Errors.Should().ContainKey("LastName");
+            parsedJson.Errors["LastName"].Should().BeEquivalentTo("The length of 'Last Name' must be at least 3 characters. You entered 0 characters.");
+
+            parsedJson.Errors.Should().ContainKey("ReferenceNumber");
+            parsedJson.Errors["ReferenceNumber"][0].Should().BeEquivalentTo("'Reference Number' must not be empty.");
         }
 
         [Fact]
