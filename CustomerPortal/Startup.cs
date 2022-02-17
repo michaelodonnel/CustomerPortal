@@ -1,4 +1,7 @@
+using CustomerPortal.Controllers.Customers;
 using Database;
+using Database.Interfaces;
+using Database.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -21,6 +24,8 @@ namespace CustomerPortal
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<AFIContext>();
+            services.AddTransient<ICustomerService, CustomerService>();
+            services.AddTransient<ICustomerRepository, CustomerRepository>();
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
