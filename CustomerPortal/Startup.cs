@@ -7,6 +7,7 @@ using Database.Repositories;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -61,6 +62,17 @@ namespace CustomerPortal
             {
                 endpoints.MapControllers();
             });
+
+            // Apply migrations to DB
+            var scopeFactory = app.ApplicationServices.GetService<IServiceScopeFactory>();
+
+            using var serviceScope = scopeFactory.CreateScope();
+            var context = serviceScope.ServiceProvider.GetRequiredService<AFIContext>();
+
+            if (context.Database.ProviderName != "Microsoft.EntityFrameworkCore.InMemory")
+            {
+                context.Database.Migrate();
+            }
         }
     }
 }
